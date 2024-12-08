@@ -10,12 +10,12 @@ for initial_row in initial_rows:
     )
 
 
-def digits(n):
+def number_of_digits(n):
     return int(log10(n)) + 1
 
 
 def endswith(a, b):
-    return (a - b) % 10 ** digits(b) == 0
+    return (a - b) % pow(10, number_of_digits(b)) == 0
 
 
 def is_solvable(expected: int, operands: list[int]) -> bool:
@@ -27,7 +27,7 @@ def is_solvable(expected: int, operands: list[int]) -> bool:
     ):
         return True
     if endswith(expected, current_operand) and is_solvable(
-        expected // (10 ** digits(current_operand)), operands[0:-1]
+        expected // (10 ** number_of_digits(current_operand)), operands[0:-1]
     ):
         return True
     else:

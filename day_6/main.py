@@ -1,13 +1,13 @@
-from enum import Enum, auto
+# from enum import Enum, auto
 import time
 from multiprocessing import Pool
 
 
-class Direction(Enum):
-    UP = auto()
-    RIGHT = auto()
-    LEFT = auto()
-    DOWN = auto()
+class Direction():
+    UP = 1
+    RIGHT = 2
+    LEFT = 3
+    DOWN = 4
 
 
 file = open("./input.txt", "r")
@@ -119,8 +119,8 @@ def remember_visited(curr_pos, next_pos, guard_direction, local_rows):
 
 def simulate_guard_opti(
     next_ups, next_rights, next_downs, next_lefts, rows=None, should_draw=False
-) -> bool:
-    local_rows = rows or initial_rows.copy()
+):
+    local_rows = rows or initial_rows[:]
     guard_position = initial_guard_position
     guard_direction = Direction.UP
     has_reached_outside = False
@@ -171,11 +171,11 @@ def simulate_guard_opti(
     return has_reached_outside
 
 
-def simulate_obstacle_for_row(row_index) -> int:
+def simulate_obstacle_for_row(row_index):
     local_result = 0
-    local_initial_rows = initial_rows.copy()
+    local_initial_rows = initial_rows[:]
     for y in range(len(local_initial_rows)):
-        local_rows = local_initial_rows.copy()
+        local_rows = local_initial_rows[:]
         row_to_modify = list(local_rows[row_index])
         row_to_modify[y] = "#"
         local_rows[row_index] = row_to_modify
@@ -186,7 +186,7 @@ def simulate_obstacle_for_row(row_index) -> int:
 
 
 def main():
-    rows = initial_rows.copy()
+    rows = initial_rows[:]
 
     def move_guard(next_x, next_y):
         row_as_char_array = list(rows[next_x])
@@ -244,22 +244,22 @@ def main():
         except IndexError:
             pass
 
-    rows = initial_rows.copy()
+    rows = initial_rows[:]
     start_time = time.time()
     simulate_guard(rows)
     result = 0
     for row in rows:
         result += row.count("X") + row.count("^")
-    print(f"Part 1 := {result}")
+    print("Part 1 := %s" % result)
     print("--- %s seconds ---" % (time.time() - start_time))
 
-    rows = initial_rows.copy()
+    rows = initial_rows[:]
     start_time = time.time()
-    simulate_guard_opti(*compute_next_arrays(rows), rows, True)
+    simulate_guard_opti(*compute_next_arrays(rows), rows=rows, should_draw=True)
     result = 0
     for row in rows:
         result += row.count("X")
-    print(f"Part 1 opti := {result}")
+    print("Part 1 opti := %s" % result)
     print("--- %s seconds ---" % (time.time() - start_time))
 
     start_time = time.time()
@@ -267,20 +267,23 @@ def main():
     for x in range(len(initial_rows)):
         result += simulate_obstacle_for_row(x)
 
-    print(f"Part 2 := {result}")
+    print("Part 2 := %s" % result)
     # 167.54149413108826 seconds
     # 110.30688691139221 seconds
+    # 38.7337961197 seconds with pypy
     print("--- %s seconds ---" % (time.time() - start_time))
 
     result = 0
     start_time = time.time()
-    with Pool(10) as p:
-        thread_result = p.map(simulate_obstacle_for_row, range(len(initial_rows)))
+    p = Pool(10)
+    # with Pool(10) as p:
+    thread_result = p.map(simulate_obstacle_for_row, range(len(initial_rows)))
     result = sum(thread_result)
 
-    print(f"Part 2 parralel:= {result}")
+    print("Part 2 parralel:= %s" % result)
     # --- 47.452966928482056 seconds ---
     # --- 23.373275995254517 seconds ---
+    # --- 10.1282548904 seconds --- pypy
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
